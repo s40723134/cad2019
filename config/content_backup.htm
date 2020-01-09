@@ -45,4 +45,37 @@
 <p>1.將球體節點添加為geometry新創建的形狀節點的字段。<br/>2.展開PBRAppearance節點並將其metalness字段更改為0，並將其roughness字段更改為1。<br/>3.將另一個Sphere節點添加到Solid的boundingObject字段。<br/>4.最後，將一個Physics節點添加到Solid的physics字段中。<br/>5.通過修改實體節點的translation字段，將球放在機器人的前面（例如）。{0, 0.2, -0.2}<br/>6.保存模擬。<br/>7.結果如圖所示。</p>
 <p><img alt="" height="173" src="/images/未命名2.png" width="305"/><br/>Webots中的第一個剛體。</p>
 <p>當模擬開始時，球擊中地板。您可以通過向球施加力來移動球（Ctrl + Alt +左鍵單擊+拖動）。通過啟用View / Optional Rendering / Show Contact Points菜單項，可以將球和地板之間的接觸點顯示為青色線。</p>
-<h3>影片</h3>
+<p></p>
+<p>5.幾何形狀</p>
+<p>為了定義球，我們在兩個不同的上下文中使用了Sphere節點：用於圖形表示（children）和定義物理邊界（boundingObject）。所有Geometry節點（例如Sphere節點）都可以在圖形上下文中使用。但是，它們的子集只能在物理環境中使用。的節點圖表圖表示哪些節點在每個上下文都支持。</p>
+<p>現在，我們將通過增加用於表示球體的三角形的數量來減小球體的大小並提高其圖形質量。</p>
+<p>操作5:<br/>對於每一個球體限定球節點，其設置radius於場0.05和它的subdivision字段2</p>
+<p></p>
+<p>6.定義使用機制</p>
+<p>該DEF-USE機制允許在一個地方定義一個節點，並在場景樹在其他地方重複使用的定義。這對於避免在世界文件中復制相同節點很有用。此外，它還允許用戶同時修改多個對象。它是這樣工作的：首先用DEF字符串標記節點。然後，可以使用USE關鍵字將該節點的副本重用於其他地方。只能編輯DEF節點的字段，USE的字段從DEF節點繼承，並且不能更改。該機制取決於world文件中節點的順序。應在任何相應的USE節點之前定義DEF節點。</p>
+<p>我們之前用來定義球的兩個Sphere定義是多餘的。現在，我們將使用DEF-USE機制將這兩個Sphere合併為一次。</p>
+<p>操作6:<br/>在場景樹視圖中選擇第一個Sphere節點（Shape的子級）。場景樹視圖的字段編輯器允許您輸入DEF字符串。</p>
+<p>1.BALL_GEOMETRY在此字段中輸入。<br/>2.選擇boundingObject字段（包含第二個Sphere節點），然後通過右鍵單擊場景樹中的字段並Delete在彈出的上下文菜單中選擇條目來將其清空。<br/>3.然後，選擇boundingObject字段並單擊Add按鈕，然後USE / BALL_GEOMETRY在對話框中選擇。<br/>4.結果如圖所示。</p>
+<p>現在，更改radius第一個Sphere節點的字段也會修改其boundingObject。</p>
+<p>為方便起見，該boundingObject字段還接受Shape節點（而不是直接接受Sphere節點）。也可以在Shape級別使用相同的DEF-USE機制，如圖所示。到目前為止，最大的好處就是也可以直接將此Shape用於圖形目的。後來，對於某些傳感器，該機制將變得非常有用。</p>
+<p><img alt="" height="179" src="/images/1.jpg" width="312"/></p>
+<p>Sphere節點上的DEF-USE機制稱為BALL_GEOMETRY。</p>
+<p><img alt="" height="215" src="/images/2.jpg" width="306"/></p>
+<p>在實體的“形狀”節點上應用的DEF-USE機制。</p>
+<p>操作7:<br/>創建第二個球，使用相同的參數，但使用 Shape節點（而不是直接使用Sphere節點）作為DEF-USE機制。</p>
+<p></p>
+<p>7.添加牆</p>
+<p>為了驗證您的進度，請自己實施四堵牆以包圍環境。必鬚根據環境靜態定義牆壁。要了解靜態和動態之間的區別，我們將定義的物體（球）放在地面上方。如果“ 物理”節點為NULL，則在仿真過程中它將保持凍結狀態（靜態情況）。如果該physics字段包含“ 物理”節點，則它將屬於重力作用（動態情況）。</p>
+<p>在Shape級別而不是Geometry級別，盡可能使用DEF-USE機制。實際上，在實體節點的字段中添加中間Shape節點更為方便。實現牆的最佳幾何原語是Box節點。所有牆壁僅需定義一個形狀。預期結果如圖所示。boundingObject</p>
+<p>操作8:<br/>添加四面牆，而不添加物理場，並且僅使用Shape節點的一個定義。</p>
+<p></p>
+<p>8.解決方案：世界文件</p>
+<p>要將您的世界與解決方案進行比較，請轉到文件，找到在教程1中創建的名為“ my_first_simulation”的文件夾，然後轉到“ worlds”文件夾並使用文本編輯器打開正確的世界。 與其他解決方案一樣，該解決方案位於solution目錄中。</p>
+<p><img alt="" height="168" src="/images/3.jpg" width="296"/></p>
+<p>在第二篇教程結尾處的仿真狀態。</p>
+<p></p>
+<p>9.效率</p>
+<p>剛體的模擬在計算上是昂貴的。可以通過最小化邊界對象的數量，最小化邊界對象之間的約束（在下一個教程中有關約束的更多信息）以及最大化WorldInfo.basicTimeStep字段來提高仿真速度。在每個模擬中，必須在模擬速度和真實性之間找到一個折衷。</p>
+<p></p>
+<p>10.結論</p>
+<p>在本教程的最後，您將能夠基於剛體創建簡單的環境。您可以從場景樹視圖添加節點並修改其字段。您已經熟悉了Solid，Physics，Shape，Sphere和Box節點。您還看到了DEF-USE機制，該機制可減少場景樹的節點冗餘。</p><h3>影片</h3>
